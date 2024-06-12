@@ -1,0 +1,702 @@
+{
+	"info": {
+		"_postman_id": "364febe6-69ba-49c1-b212-5b4030baeb24",
+		"name": "ArmorAutomation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27766283",
+		"_collection_link": "https://rently.postman.co/workspace/a05e4ad6-150b-424d-89e3-d453ad0a0f3f/collection/27766283-364febe6-69ba-49c1-b212-5b4030baeb24?action=share&source=collection_link&creator=27766283"
+	},
+	"item": [
+		{
+			"name": "OAuth 2.0",
+			"item": [
+				{
+					"name": "oauth_discovery_provider",
+					"item": [
+						{
+							"name": "Get OpenID Provider Configuration Document",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Response status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Content type is application/json\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+											"});",
+											"",
+											"pm.test(\"Response should have jwks uri\", function () {",
+											"    pm.expect(pm.response.json().jwks_uri).to.exist;",
+											"});",
+											"",
+											"pm.test(\"Response should have list of supported scopes\", function () {",
+											"    pm.expect(pm.response.json().scopes_supported).to.eql([",
+											"        \"public\",",
+											"        \"openid\",",
+											"        \"email\",",
+											"        \"profile\",",
+											"        \"agent_identity:create\",",
+											"        \"agent_identity:update\",",
+											"        \"agent_identity:destroy\",",
+											"        \"agent_identity:password_reset_token\",",
+											"        \"agent_identity:claim_profile\",",
+											"        \"agent_identity:claim_salesforce_id\",",
+											"        \"agent_identity:claim_rently_id\",",
+											"        \"agent_identity:claim_sso_enabled\"",
+											"    ])",
+											"});",
+											"",
+											"pm.test(\"Response should have list of supported grant types\", function () {",
+											"    pm.expect(pm.response.json().grant_types_supported).to.eql([",
+											"        \"authorization_code\",",
+											"        \"client_credentials\",",
+											"        \"password\",",
+											"        \"refresh_token\"",
+											"    ])",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{armor_url}}/.well-known/openid-configuration",
+									"host": [
+										"{{armor_url}}"
+									],
+									"path": [
+										".well-known",
+										"openid-configuration"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Gives OpenID Configuration Document",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://armor.rentlyaura.com/.well-known/openid-configuration",
+											"protocol": "https",
+											"host": [
+												"armor",
+												"rentlyaura",
+												"com"
+											],
+											"path": [
+												".well-known",
+												"openid-configuration"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "openresty"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 12 Jun 2024 06:33:02 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1385"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "Etag",
+											"value": "W/\"b9347d75d290427c6104cfc15c841a14\""
+										},
+										{
+											"key": "Referrer-Policy",
+											"value": "strict-origin-when-cross-origin"
+										},
+										{
+											"key": "Vary",
+											"value": "Accept"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-Download-Options",
+											"value": "noopen"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-Permitted-Cross-Domain-Policies",
+											"value": "none"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "f9291b91-b430-4139-8279-d40a91b69add"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.002935"
+										},
+										{
+											"key": "X-Served-By",
+											"value": "armor.rentlyaura.com"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"issuer\": \"https://armor.rentlyaura.com\",\n    \"authorization_endpoint\": \"https://armor.rentlyaura.com/oauth/authorize\",\n    \"token_endpoint\": \"https://armor.rentlyaura.com/oauth/token\",\n    \"revocation_endpoint\": \"https://armor.rentlyaura.com/oauth/revoke\",\n    \"introspection_endpoint\": \"https://armor.rentlyaura.com/oauth/introspect\",\n    \"userinfo_endpoint\": \"https://armor.rentlyaura.com/oauth/userinfo\",\n    \"jwks_uri\": \"https://armor.rentlyaura.com/oauth/discovery/keys\",\n    \"scopes_supported\": [\n        \"public\",\n        \"openid\",\n        \"email\",\n        \"profile\",\n        \"agent_identity:create\",\n        \"agent_identity:update\",\n        \"agent_identity:destroy\",\n        \"agent_identity:password_reset_token\",\n        \"agent_identity:claim_profile\",\n        \"agent_identity:claim_salesforce_id\",\n        \"agent_identity:claim_rently_id\",\n        \"agent_identity:claim_sso_enabled\"\n    ],\n    \"response_types_supported\": [\n        \"code\"\n    ],\n    \"response_modes_supported\": [\n        \"query\",\n        \"fragment\",\n        \"form_post\"\n    ],\n    \"grant_types_supported\": [\n        \"authorization_code\",\n        \"client_credentials\",\n        \"password\",\n        \"refresh_token\"\n    ],\n    \"token_endpoint_auth_methods_supported\": [\n        \"client_secret_basic\",\n        \"client_secret_post\"\n    ],\n    \"subject_types_supported\": [\n        \"public\"\n    ],\n    \"id_token_signing_alg_values_supported\": [\n        \"RS256\"\n    ],\n    \"claim_types_supported\": [\n        \"normal\"\n    ],\n    \"claims_supported\": [\n        \"iss\",\n        \"sub\",\n        \"aud\",\n        \"exp\",\n        \"iat\",\n        \"email\",\n        \"fullname\",\n        \"role\",\n        \"data_entry\",\n        \"rently_company_id\",\n        \"salesforce_id\",\n        \"rently_id\",\n        \"sso_enabled\",\n        \"phone_number\",\n        \"agent_login_duration\"\n    ],\n    \"code_challenge_methods_supported\": [\n        \"plain\",\n        \"S256\"\n    ]\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "oauth_discovery_keys",
+					"item": [
+						{
+							"name": "Get OAuth discovery Keys",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"",
+											"pm.test(\"Response status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Response should have keys\", function () {    ",
+											"    pm.expect(pm.response.json().keys).to.exist;",
+											"});",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{armor_url}}/oauth/discovery/keys",
+									"host": [
+										"{{armor_url}}"
+									],
+									"path": [
+										"oauth",
+										"discovery",
+										"keys"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Gives JWKS",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://armor.rentlyaura.com/oauth/discovery/keys",
+											"protocol": "https",
+											"host": [
+												"armor",
+												"rentlyaura",
+												"com"
+											],
+											"path": [
+												"oauth",
+												"discovery",
+												"keys"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "openresty"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 12 Jun 2024 06:37:58 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "483"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "Etag",
+											"value": "W/\"41416cdda97d5b2b374cc21f608fee28\""
+										},
+										{
+											"key": "Referrer-Policy",
+											"value": "strict-origin-when-cross-origin"
+										},
+										{
+											"key": "Vary",
+											"value": "Accept"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-Download-Options",
+											"value": "noopen"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-Permitted-Cross-Domain-Policies",
+											"value": "none"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "7a20dc11-8ca5-4ebd-8c5d-8ecb3b8c5622"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.002564"
+										},
+										{
+											"key": "X-Served-By",
+											"value": "armor.rentlyaura.com"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"keys\": [\n        {\n            \"kty\": \"RSA\",\n            \"n\": \"q5pBrIlsqavvV89gcW2DPZXXq9mtVXPj5NFyGkw-Agp31m6G-oxEvwVZXFFZ7kWhreUSw94xfJfErfzofLfqPRp3ItsViXtNuxI2j1JYcRoIdaPr930_upQgNezKQzdZXB0V0YBA0VW8CLS9HkUmiSzMcv2oBL4eaKWBcFRaPRnEUOZXm0-Tas18gDLphF5VG0l7eNWnPVyMJ1w5qYQ4ooHoAYJN2jp9oAkJ9-LqLhSGT6vVGsG-SwpH2dd8TIuN7WIKf3l4dXT_aX5X9iX09kPmz1nxTdeNFYb_DA8y0RRQUCMsA84Nm5qtHJmihB3M5FIEOP9fyf4A5TYSyV-8gw\",\n            \"e\": \"AQAB\",\n            \"kid\": \"e695d911333f64af0cd9ee86353b097258cec02672d72fd104dfb052b680c6d8\",\n            \"use\": \"sig\",\n            \"alg\": \"RS256\"\n        }\n    ]\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "oauth_token",
+					"item": [
+						{
+							"name": "ROPC",
+							"item": [
+								{
+									"name": "When invalid client id or no client id is given",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"",
+													"pm.test(\"Response status code is 200\", function () {",
+													"    pm.response.to.have.status(400);",
+													"});",
+													"",
+													"pm.test(\"Response should have an invalid application error\", function () {",
+													"    pm.expect(pm.response.json().error).to.equal(\"invalid application\")",
+													"});",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "grant_type",
+													"value": "password",
+													"type": "text"
+												},
+												{
+													"key": "username",
+													"value": "postman@rently.com",
+													"type": "text",
+													"disabled": true
+												},
+												{
+													"key": "password",
+													"value": "postman@1234",
+													"type": "text",
+													"disabled": true
+												},
+												{
+													"key": "client_id",
+													"value": "",
+													"type": "text",
+													"disabled": true
+												}
+											]
+										},
+										"url": {
+											"raw": "{{armor_url}}/oauth/token",
+											"host": [
+												"{{armor_url}}"
+											],
+											"path": [
+												"oauth",
+												"token"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Gives invalid application error",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "grant_type",
+															"value": "password",
+															"type": "text"
+														},
+														{
+															"key": "username",
+															"value": "postman@rently.com",
+															"type": "text",
+															"disabled": true
+														},
+														{
+															"key": "password",
+															"value": "postman@1234",
+															"type": "text",
+															"disabled": true
+														},
+														{
+															"key": "client_id",
+															"value": "",
+															"type": "text",
+															"disabled": true
+														}
+													]
+												},
+												"url": {
+													"raw": "https://armor.rentlyaura.com/oauth/token",
+													"protocol": "https",
+													"host": [
+														"armor",
+														"rentlyaura",
+														"com"
+													],
+													"path": [
+														"oauth",
+														"token"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "openresty"
+												},
+												{
+													"key": "Date",
+													"value": "Wed, 12 Jun 2024 06:59:54 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Cache-Control",
+													"value": "no-store"
+												},
+												{
+													"key": "Referrer-Policy",
+													"value": "strict-origin-when-cross-origin"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "Www-Authenticate",
+													"value": "Bearer realm=\"Doorkeeper\", error=\"invalid application\", error_description=\"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\""
+												},
+												{
+													"key": "X-Content-Type-Options",
+													"value": "nosniff"
+												},
+												{
+													"key": "X-Download-Options",
+													"value": "noopen"
+												},
+												{
+													"key": "X-Frame-Options",
+													"value": "SAMEORIGIN"
+												},
+												{
+													"key": "X-Permitted-Cross-Domain-Policies",
+													"value": "none"
+												},
+												{
+													"key": "X-Request-Id",
+													"value": "1ba5bec9-f6ce-40c9-8829-535c9f98535c"
+												},
+												{
+													"key": "X-Runtime",
+													"value": "0.005883"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"error\": \"invalid application\",\n    \"error_description\": \"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\"\n}"
+										}
+									]
+								},
+								{
+									"name": "when username or password is not correct",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Response status code is 401\", function () {",
+													"    pm.expect(pm.response.code).to.equal(401);",
+													"});",
+													"",
+													"pm.test(\"Response should have incorrect credentials error message\", function () {",
+													"    pm.expect(pm.response.json().message).to.equal(\"Username or password is incorrect\")",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "grant_type",
+													"value": "password",
+													"type": "text"
+												},
+												{
+													"key": "username",
+													"value": "postman@rently.com",
+													"type": "text"
+												},
+												{
+													"key": "password",
+													"value": "password",
+													"type": "text"
+												},
+												{
+													"key": "client_id",
+													"value": "{{rently_client_id}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{armor_url}}/oauth/token",
+											"host": [
+												"{{armor_url}}"
+											],
+											"path": [
+												"oauth",
+												"token"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Gives error message",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "grant_type",
+															"value": "password",
+															"type": "text"
+														},
+														{
+															"key": "username",
+															"value": "postman@rently.com",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "password",
+															"type": "text"
+														},
+														{
+															"key": "client_id",
+															"value": "{{rently_client_id}}",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{armor_base_url}}/oauth/token",
+													"host": [
+														"{{armor_base_url}}"
+													],
+													"path": [
+														"oauth",
+														"token"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "openresty"
+												},
+												{
+													"key": "Date",
+													"value": "Wed, 12 Jun 2024 07:11:06 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Cache-Control",
+													"value": "no-cache"
+												},
+												{
+													"key": "Referrer-Policy",
+													"value": "strict-origin-when-cross-origin"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "X-Content-Type-Options",
+													"value": "nosniff"
+												},
+												{
+													"key": "X-Download-Options",
+													"value": "noopen"
+												},
+												{
+													"key": "X-Frame-Options",
+													"value": "SAMEORIGIN"
+												},
+												{
+													"key": "X-Permitted-Cross-Domain-Policies",
+													"value": "none"
+												},
+												{
+													"key": "X-Request-Id",
+													"value": "43d413b6-f813-4860-bbda-c4e30f140b95"
+												},
+												{
+													"key": "X-Runtime",
+													"value": "0.438524"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"message\": \"Username or password is incorrect\",\n    \"description\": \"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\"\n}"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
