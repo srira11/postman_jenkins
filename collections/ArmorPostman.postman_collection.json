@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "364febe6-69ba-49c1-b212-5b4030baeb24",
-		"name": "ArmorAutomation",
+		"_postman_id": "66392cd4-be6f-4b3f-91a7-1c1de24d5b44",
+		"name": "Armor Postman",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "27766283",
-		"_collection_link": "https://rently.postman.co/workspace/a05e4ad6-150b-424d-89e3-d453ad0a0f3f/collection/27766283-364febe6-69ba-49c1-b212-5b4030baeb24?action=share&source=collection_link&creator=27766283"
+		"_collection_link": "https://rently.postman.co/workspace/a05e4ad6-150b-424d-89e3-d453ad0a0f3f/collection/27766283-66392cd4-be6f-4b3f-91a7-1c1de24d5b44?action=share&source=collection_link&creator=27766283"
 	},
 	"item": [
 		{
@@ -20,11 +20,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"",
 											"pm.test(\"Response status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
 											"});",
-											"",
 											"",
 											"pm.test(\"Content type is application/json\", function () {",
 											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
@@ -58,7 +56,19 @@
 											"        \"password\",",
 											"        \"refresh_token\"",
 											"    ])",
-											"});"
+											"});",
+											"",
+											"pm.variables.set(\"iteration\", 0);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"iteration\", 0);"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -77,7 +87,8 @@
 										".well-known",
 										"openid-configuration"
 									]
-								}
+								},
+								"description": "hello"
 							},
 							"response": [
 								{
@@ -86,12 +97,9 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "https://armor.rentlyaura.com/.well-known/openid-configuration",
-											"protocol": "https",
+											"raw": "{{armor_base_url}}/.well-known/openid-configuration",
 											"host": [
-												"armor",
-												"rentlyaura",
-												"com"
+												"{{armor_base_url}}"
 											],
 											"path": [
 												".well-known",
@@ -195,7 +203,7 @@
 											"    pm.expect(pm.response.json().keys).to.exist;",
 											"});",
 											"",
-											"",
+											"pm.variables.set(\"iteration\", 0);",
 											""
 										],
 										"type": "text/javascript",
@@ -225,12 +233,9 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "https://armor.rentlyaura.com/oauth/discovery/keys",
-											"protocol": "https",
+											"raw": "{{armor_base_url}}/oauth/discovery/keys",
 											"host": [
-												"armor",
-												"rentlyaura",
-												"com"
+												"{{armor_base_url}}"
 											],
 											"path": [
 												"oauth",
@@ -322,20 +327,107 @@
 							"name": "ROPC",
 							"item": [
 								{
-									"name": "When invalid client id or no client id is given",
+									"name": "Post Resource Owner Password Credential",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
+													"let currentIteration = pm.collectionVariables.get(\"iteration\");",
 													"",
-													"pm.test(\"Response status code is 200\", function () {",
-													"    pm.response.to.have.status(400);",
-													"});",
+													"switch(currentIteration) {",
+													"    // Successful Response",
+													"    case 0:",
+													"        pm.test(\"Response status code is 200\", function () {",
+													"            pm.response.to.have.status(200);            ",
+													"        });",
 													"",
-													"pm.test(\"Response should have an invalid application error\", function () {",
-													"    pm.expect(pm.response.json().error).to.equal(\"invalid application\")",
-													"});",
+													"        pm.test(\"Response should have an access_token\", function () {",
+													"            pm.expect(pm.response.json().access_token).to.exist;",
+													"        });",
+													"",
+													"        pm.test(\"Response should have a refresh_token\", function () {",
+													"            pm.expect(pm.response.json().refresh_token).to.exist;",
+													"        });",
+													"",
+													"        pm.test(\"Response should have a defined scope\", function () {",
+													"            pm.expect(pm.response.json().scope).to.exist;",
+													"        });",
+													"",
+													"        pm.test(\"Response should have a expiring time\", function () {",
+													"            pm.expect(pm.response.json().expires_in).to.exist;",
+													"        });",
+													"",
+													"        pm.test(\"Response should have token type as Bearer\", function () {",
+													"            pm.expect(pm.response.json().token_type).to.eql(\"Bearer\");",
+													"        });",
+													"",
+													"        break;",
+													"",
+													"    // When username or password is incorrect",
+													"    case 1:",
+													"        pm.test(\"Response status code is 401\", function () {",
+													"            pm.expect(pm.response.code).to.equal(401);",
+													"        });",
+													"",
+													"        pm.test(\"Response should have incorrect credentials error message\", function () {",
+													"            pm.expect(pm.response.json().message).to.equal(\"Username or password is incorrect\")",
+													"        });",
+													"",
+													"        break;",
+													"",
+													"    // When invalid client id or no client id is given",
+													"    case 2:",
+													"        pm.test(\"Response status code is 400\", function () {",
+													"            pm.response.to.have.status(400);",
+													"        });",
+													"",
+													"        pm.test(\"Response should have an invalid application error\", function () {",
+													"            pm.expect(pm.response.json().error).to.equal(\"invalid application\")",
+													"        });",
+													"",
+													"        break;",
+													"",
+													"    // When account creation is under process",
+													"    case 3:",
+													"        pm.test(\"Response status code is 401\", function () {",
+													"            pm.response.to.have.status(401);            ",
+													"        });",
+													"",
+													"        pm.test(\"Response should have an under process error message\", function () {",
+													"            pm.expect(pm.response.json().message).to.equal(\"Your account creation is under process. Please try again in sometime.\")",
+													"        });",
+													"",
+													"        break;",
+													"}",
+													"",
+													"if (currentIteration < 3) {",
+													"    pm.collectionVariables.set(\"iteration\", currentIteration + 1);",
+													"    pm.execution.setNextRequest(pm.info.requestId);",
+													"} else {",
+													"    pm.collectionVariables.set(\"iteration\", 0)",
+													"    pm.execution.setNextRequest(null);",
+													"}"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"let requestData = [",
+													"    { \"username\": \"postman@rently.com\", \"password\": \"Postman@1234\", \"client_id\": pm.environment.get(\"armor_client_id\")},",
+													"    { \"username\": \"postman@rently.com\", \"password\": \"password\", \"client_id\": pm.environment.get(\"armor_client_id\") },",
+													"    { \"username\": null, \"password\": null, \"client_id\": null },",
+													"    { \"username\": \"unprocessedaccount@rently.com\", \"password\": \"Postman@1234\", \"client_id\": pm.environment.get(\"armor_client_id\")}",
+													"]",
+													"",
+													"currentData = requestData[pm.collectionVariables.get(\"iteration\")]",
+													"pm.variables.set(\"username\", currentData[\"username\"])",
+													"pm.variables.set(\"password\", currentData[\"password\"])",
+													"pm.variables.set(\"client_id\", currentData[\"client_id\"])",
 													""
 												],
 												"type": "text/javascript",
@@ -356,21 +448,18 @@
 												},
 												{
 													"key": "username",
-													"value": "postman@rently.com",
-													"type": "text",
-													"disabled": true
+													"value": "{{username}}",
+													"type": "text"
 												},
 												{
 													"key": "password",
-													"value": "postman@1234",
-													"type": "text",
-													"disabled": true
+													"value": "{{password}}",
+													"type": "text"
 												},
 												{
 													"key": "client_id",
-													"value": "",
-													"type": "text",
-													"disabled": true
+													"value": "{{client_id}}",
+													"type": "text"
 												}
 											]
 										},
@@ -387,7 +476,7 @@
 									},
 									"response": [
 										{
-											"name": "Gives invalid application error",
+											"name": "Successful Response",
 											"originalRequest": {
 												"method": "POST",
 												"header": [],
@@ -402,29 +491,26 @@
 														{
 															"key": "username",
 															"value": "postman@rently.com",
-															"type": "text",
-															"disabled": true
+															"type": "text"
 														},
 														{
 															"key": "password",
-															"value": "postman@1234",
-															"type": "text",
-															"disabled": true
+															"value": "Postman@1234",
+															"type": "text"
 														},
 														{
 															"key": "client_id",
-															"value": "",
-															"type": "text",
-															"disabled": true
+															"value": "r68BnizhBaDI7O46qGf1Ms0wvE73Pgs1dPvo9GoH9mg",
+															"type": "text"
 														}
 													]
 												},
 												"url": {
-													"raw": "https://armor.rentlyaura.com/oauth/token",
+													"raw": "https://armor.rentlyqeop.com/oauth/token",
 													"protocol": "https",
 													"host": [
 														"armor",
-														"rentlyaura",
+														"rentlyqeop",
 														"com"
 													],
 													"path": [
@@ -433,8 +519,8 @@
 													]
 												}
 											},
-											"status": "Bad Request",
-											"code": 400,
+											"status": "OK",
+											"code": 200,
 											"_postman_previewlanguage": "json",
 											"header": [
 												{
@@ -443,15 +529,15 @@
 												},
 												{
 													"key": "Date",
-													"value": "Wed, 12 Jun 2024 06:59:54 GMT"
+													"value": "Mon, 01 Jul 2024 10:25:43 GMT"
 												},
 												{
 													"key": "Content-Type",
 													"value": "application/json; charset=utf-8"
 												},
 												{
-													"key": "Transfer-Encoding",
-													"value": "chunked"
+													"key": "Content-Length",
+													"value": "1662"
 												},
 												{
 													"key": "Connection",
@@ -462,16 +548,16 @@
 													"value": "no-store"
 												},
 												{
+													"key": "Etag",
+													"value": "W/\"4179aa01c3bf7deac97d5b603d1c1de7\""
+												},
+												{
 													"key": "Referrer-Policy",
 													"value": "strict-origin-when-cross-origin"
 												},
 												{
 													"key": "Vary",
-													"value": "Origin"
-												},
-												{
-													"key": "Www-Authenticate",
-													"value": "Bearer realm=\"Doorkeeper\", error=\"invalid application\", error_description=\"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\""
+													"value": "Accept, Origin"
 												},
 												{
 													"key": "X-Content-Type-Options",
@@ -491,80 +577,22 @@
 												},
 												{
 													"key": "X-Request-Id",
-													"value": "1ba5bec9-f6ce-40c9-8829-535c9f98535c"
+													"value": "c5ce1bb9-8390-42ad-80c3-32e9f2dac102"
 												},
 												{
 													"key": "X-Runtime",
-													"value": "0.005883"
+													"value": "0.545295"
+												},
+												{
+													"key": "X-Served-By",
+													"value": "armor.rentlyqeop.com"
 												}
 											],
 											"cookie": [],
-											"body": "{\n    \"error\": \"invalid application\",\n    \"error_description\": \"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\"\n}"
-										}
-									]
-								},
-								{
-									"name": "when username or password is not correct",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Response status code is 401\", function () {",
-													"    pm.expect(pm.response.code).to.equal(401);",
-													"});",
-													"",
-													"pm.test(\"Response should have incorrect credentials error message\", function () {",
-													"    pm.expect(pm.response.json().message).to.equal(\"Username or password is incorrect\")",
-													"});"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [],
-										"body": {
-											"mode": "urlencoded",
-											"urlencoded": [
-												{
-													"key": "grant_type",
-													"value": "password",
-													"type": "text"
-												},
-												{
-													"key": "username",
-													"value": "postman@rently.com",
-													"type": "text"
-												},
-												{
-													"key": "password",
-													"value": "password",
-													"type": "text"
-												},
-												{
-													"key": "client_id",
-													"value": "{{rently_client_id}}",
-													"type": "text"
-												}
-											]
+											"body": "{\n    \"access_token\": \"eyJraWQiOiJlNjk1ZDkxMTMzM2Y2NGFmMGNkOWVlODYzNTNiMDk3MjU4Y2VjMDI2NzJkNzJmZDEwNGRmYjA1MmI2ODBjNmQ4IiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FybW9yLnJlbnRseXFlb3AuY29tIiwiaWF0IjoxNzE5ODI5NTQzLCJhdWQiOiJyNjhCbml6aEJhREk3TzQ2cUdmMU1zMHd2RTczUGdzMWRQdm85R29IOW1nIiwianRpIjoiMmVlNTUzZTYtMWJlMi00ODI4LTgxMTAtMTE1NTg4MmNkMzA3Iiwic3ViIjoiYjExNDRlZWUtYTA3My00YmVmLWIyNmUtNDdlNzA3ZmFmZjFhIiwiZXhwIjoxNzE5ODM2NzQzLCJzdWJfdXBkYXRlZF9hdCI6bnVsbH0.anfJ2fn-pr57jC0RnOC8V0vwi5-5qw-dTCEWuq4VslGoRgRjP-FVSsArTlKKdIWYMeWH0O3zXQTv4Gdah9KR-bk8f0CTSUKrd5EUkac1rgpoh7l0dRGuiMV8mFMcjB96aNUuhIGF-U-NYI5gyB3kKerOQ2B6mdkr9UFQygmtOPdRWQBRXudUQBHIBhY9PU0C6pyXVcTkMxTVk4LY1naBQJOMq-dLN8J17ZZpvoQDH3xRrP9rgopr9E7mk-I79cHoMgvC9sYZeez6kGiKs1_nE5elBpoj_KciF9zHPLOq2P2LKtnTB8WoT78M3uhidqJK5RZp6R7S-6_D0SjvFdgxlQ\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 7200,\n    \"refresh_token\": \"iwkfUGr9ObQGNy9DRnnKHQqXJHA6rUqiELbetoyoesQ\",\n    \"scope\": \"public openid email profile\",\n    \"created_at\": 1719829543,\n    \"id_token\": \"eyJraWQiOiJlNjk1ZDkxMTMzM2Y2NGFmMGNkOWVlODYzNTNiMDk3MjU4Y2VjMDI2NzJkNzJmZDEwNGRmYjA1MmI2ODBjNmQ4IiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FybW9yLnJlbnRseXFlb3AuY29tIiwic3ViIjoiYjExNDRlZWUtYTA3My00YmVmLWIyNmUtNDdlNzA3ZmFmZjFhIiwiYXVkIjoicjY4Qm5pemhCYURJN080NnFHZjFNczB3dkU3M1BnczFkUHZvOUdvSDltZyIsImV4cCI6MTcxOTgzMDE0MywiaWF0IjoxNzE5ODI5NTQzfQ.qH1e4SjRdwAxiT64JxUviOdtj63IUpBASu56UlefUdGGDj14XPRqVPytuPOwKRxcs5NApx5Gw4usv4dsWgYxztq_ij_cVITTlGVFhQozfgWAwg_4jpe7OaaMD8bEx12UvUI1vekFB6M9XxT5jFAUUD7Bp-A_yecg_3uPsveCcMsygbLfEsuHuO5pM-Qt0b-6j78dgTSaZoVhemEhcwA8o9SYIrnRsNw1j5LB5t9AtornCKyWH-Du_CMnCAlg7TMiTayZtKkPwvx3PvyyuIGUBe33-iqt8IwkvggoKddnL-ftQEmNAx2MwHIcs3EgKtqoops0gM5cloqhrBBwiZ0Taw\"\n}"
 										},
-										"url": {
-											"raw": "{{armor_url}}/oauth/token",
-											"host": [
-												"{{armor_url}}"
-											],
-											"path": [
-												"oauth",
-												"token"
-											]
-										}
-									},
-									"response": [
 										{
-											"name": "Gives error message",
+											"name": "When username or password is not correct",
 											"originalRequest": {
 												"method": "POST",
 												"header": [],
@@ -588,7 +616,7 @@
 														},
 														{
 															"key": "client_id",
-															"value": "{{rently_client_id}}",
+															"value": "rf3A4qucDH6MdUdHmG1YdJqDGFkoeExMlsktvE_qVxs",
 															"type": "text"
 														}
 													]
@@ -667,10 +695,266 @@
 											],
 											"cookie": [],
 											"body": "{\n    \"message\": \"Username or password is incorrect\",\n    \"description\": \"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\"\n}"
+										},
+										{
+											"name": "When invalid client id or no client id is given",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "grant_type",
+															"value": "password",
+															"type": "text"
+														},
+														{
+															"key": "username",
+															"value": "postman@rently.com",
+															"type": "text",
+															"disabled": true
+														},
+														{
+															"key": "password",
+															"value": "postman@1234",
+															"type": "text",
+															"disabled": true
+														},
+														{
+															"key": "client_id",
+															"value": "",
+															"type": "text",
+															"disabled": true
+														}
+													]
+												},
+												"url": {
+													"raw": "{{armor_base_url}}/oauth/token",
+													"host": [
+														"{{armor_base_url}}"
+													],
+													"path": [
+														"oauth",
+														"token"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "openresty"
+												},
+												{
+													"key": "Date",
+													"value": "Wed, 12 Jun 2024 06:59:54 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Cache-Control",
+													"value": "no-store"
+												},
+												{
+													"key": "Referrer-Policy",
+													"value": "strict-origin-when-cross-origin"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "Www-Authenticate",
+													"value": "Bearer realm=\"Doorkeeper\", error=\"invalid application\", error_description=\"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\""
+												},
+												{
+													"key": "X-Content-Type-Options",
+													"value": "nosniff"
+												},
+												{
+													"key": "X-Download-Options",
+													"value": "noopen"
+												},
+												{
+													"key": "X-Frame-Options",
+													"value": "SAMEORIGIN"
+												},
+												{
+													"key": "X-Permitted-Cross-Domain-Policies",
+													"value": "none"
+												},
+												{
+													"key": "X-Request-Id",
+													"value": "1ba5bec9-f6ce-40c9-8829-535c9f98535c"
+												},
+												{
+													"key": "X-Runtime",
+													"value": "0.005883"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"error\": \"invalid application\",\n    \"error_description\": \"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\"\n}"
+										},
+										{
+											"name": "When account creation is under process",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "grant_type",
+															"value": "password",
+															"type": "text"
+														},
+														{
+															"key": "username",
+															"value": "unprocessedaccount@rently.com",
+															"type": "text"
+														},
+														{
+															"key": "password",
+															"value": "Postman@1234",
+															"type": "text"
+														},
+														{
+															"key": "client_id",
+															"value": "r68BnizhBaDI7O46qGf1Ms0wvE73Pgs1dPvo9GoH9mg",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{armor_url}}/oauth/token",
+													"host": [
+														"{{armor_url}}"
+													],
+													"path": [
+														"oauth",
+														"token"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "openresty"
+												},
+												{
+													"key": "Date",
+													"value": "Mon, 01 Jul 2024 10:12:07 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Cache-Control",
+													"value": "no-cache"
+												},
+												{
+													"key": "Referrer-Policy",
+													"value": "strict-origin-when-cross-origin"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "X-Content-Type-Options",
+													"value": "nosniff"
+												},
+												{
+													"key": "X-Download-Options",
+													"value": "noopen"
+												},
+												{
+													"key": "X-Frame-Options",
+													"value": "SAMEORIGIN"
+												},
+												{
+													"key": "X-Permitted-Cross-Domain-Policies",
+													"value": "none"
+												},
+												{
+													"key": "X-Request-Id",
+													"value": "26747afe-a461-4af5-8b7b-8680d400a5c8"
+												},
+												{
+													"key": "X-Runtime",
+													"value": "0.543319"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"message\": \"Your account creation is under process. Please try again in sometime.\",\n    \"description\": \"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.\"\n}"
 										}
 									]
 								}
 							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "API",
+			"item": [
+				{
+					"name": "Agent Identities",
+					"item": [
+						{
+							"name": "Create Agent Identity",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{armor_url}}/api/v1/agent_identities",
+									"host": [
+										"{{armor_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"agent_identities"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -697,6 +981,13 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "iteration",
+			"value": "0",
+			"type": "string"
 		}
 	]
 }
