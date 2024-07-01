@@ -333,7 +333,7 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"let currentIteration = pm.collectionVariables.get(\"iteration\");",
+													"let currentIteration = parseInt(pm.collectionVariables.get(\"iteration\"));",
 													"",
 													"switch(currentIteration) {",
 													"    // Successful Response",
@@ -424,7 +424,7 @@
 													"    { \"username\": \"unprocessedaccount@rently.com\", \"password\": \"Postman@1234\", \"client_id\": pm.environment.get(\"armor_client_id\")}",
 													"]",
 													"",
-													"currentData = requestData[pm.collectionVariables.get(\"iteration\")]",
+													"currentData = requestData[parseInt(pm.collectionVariables.get(\"iteration\"))]",
 													"pm.variables.set(\"username\", currentData[\"username\"])",
 													"pm.variables.set(\"password\", currentData[\"password\"])",
 													"pm.variables.set(\"client_id\", currentData[\"client_id\"])",
