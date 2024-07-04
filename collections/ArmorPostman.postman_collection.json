@@ -4,7 +4,7 @@
 		"name": "Armor Postman",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "27766283",
-		"_collection_link": "https://rently.postman.co/workspace/a05e4ad6-150b-424d-89e3-d453ad0a0f3f/collection/27766283-66392cd4-be6f-4b3f-91a7-1c1de24d5b44?action=share&source=collection_link&creator=27766283"
+		"_collection_link": "https://rently.postman.co/workspace/Protons~a05e4ad6-150b-424d-89e3-d453ad0a0f3f/collection/27766283-66392cd4-be6f-4b3f-91a7-1c1de24d5b44?action=share&source=collection_link&creator=27766283"
 	},
 	"item": [
 		{
@@ -407,7 +407,7 @@
 													"    pm.execution.setNextRequest(pm.info.requestId);",
 													"} else {",
 													"    pm.collectionVariables.set(\"iteration\", 0)",
-													"    pm.execution.setNextRequest(\"Create Agent Identity\");",
+													"    pm.execution.setNextRequest(\"Client Credentials\");",
 													"}"
 												],
 												"type": "text/javascript",
@@ -418,6 +418,7 @@
 											"listen": "prerequest",
 											"script": {
 												"exec": [
+													"let currentIteration = parseInt(pm.collectionVariables.get(\"iteration\"));",
 													"let requestData = [",
 													"    { \"username\": \"postman@rently.com\", \"password\": \"Postman@1234\", \"client_id\": pm.environment.get(\"armor_client_id\")},",
 													"    { \"username\": \"postman@rently.com\", \"password\": \"password\", \"client_id\": pm.environment.get(\"armor_client_id\") },",
@@ -425,7 +426,7 @@
 													"    { \"username\": \"unprocessedaccount@rently.com\", \"password\": \"Postman@1234\", \"client_id\": pm.environment.get(\"armor_client_id\")}",
 													"]",
 													"",
-													"currentData = requestData[parseInt(pm.collectionVariables.get(\"iteration\"))]",
+													"let currentData = requestData[currentIteration];",
 													"pm.variables.set(\"username\", currentData[\"username\"])",
 													"pm.variables.set(\"password\", currentData[\"password\"])",
 													"pm.variables.set(\"client_id\", currentData[\"client_id\"])",
@@ -923,6 +924,20 @@
 							"item": [
 								{
 									"name": "Client Credentials",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.collectionVariables.set(\"access_token\", pm.response.json().access_token);",
+													"pm.execution.setNextRequest(\"Create Agent Identity\");",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
 									"request": {
 										"auth": {
 											"type": "noauth"
@@ -1345,12 +1360,54 @@
 						}
 					]
 				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
 			]
 		}
 	],
 	"auth": {
 		"type": "oauth2",
 		"oauth2": [
+			{
+				"key": "clientId",
+				"value": "{{armor_client_id}}",
+				"type": "string"
+			},
+			{
+				"key": "refreshTokenUrl",
+				"value": "{{armor_url}}/oauth/token",
+				"type": "string"
+			},
 			{
 				"key": "scope",
 				"value": "agent_identity:create",
@@ -1369,11 +1426,6 @@
 			{
 				"key": "clientSecret",
 				"value": "{{armor_client_secret}}",
-				"type": "string"
-			},
-			{
-				"key": "clientId",
-				"value": "{{armor_client_id}}",
 				"type": "string"
 			},
 			{
@@ -1420,6 +1472,10 @@
 			"key": "iteration",
 			"value": "0",
 			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": ""
 		}
 	]
 }
