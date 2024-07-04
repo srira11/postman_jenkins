@@ -334,68 +334,69 @@
 											"script": {
 												"exec": [
 													"let currentIteration = parseInt(pm.collectionVariables.get(\"iteration\"));",
+													"let jsonResponse = pm.response.json();",
 													"",
 													"switch(currentIteration) {",
 													"    // Successful Response",
 													"    case 0:",
-													"        pm.test(\"Response status code is 200\", function () {",
+													"        pm.test(\"Response status code should be 200\", function () {",
 													"            pm.response.to.have.status(200);            ",
 													"        });",
 													"",
 													"        pm.test(\"Response should have an access_token\", function () {",
-													"            pm.expect(pm.response.json().access_token).to.exist;",
+													"            pm.expect(jsonResponse.access_token).to.exist;",
 													"        });",
 													"",
 													"        pm.test(\"Response should have a refresh_token\", function () {",
-													"            pm.expect(pm.response.json().refresh_token).to.exist;",
+													"            pm.expect(jsonResponse.refresh_token).to.exist;",
 													"        });",
 													"",
 													"        pm.test(\"Response should have a defined scope\", function () {",
-													"            pm.expect(pm.response.json().scope).to.exist;",
+													"            pm.expect(jsonResponse.scope).to.exist;",
 													"        });",
 													"",
 													"        pm.test(\"Response should have a expiring time\", function () {",
-													"            pm.expect(pm.response.json().expires_in).to.exist;",
+													"            pm.expect(jsonResponse.expires_in).to.exist;",
 													"        });",
 													"",
 													"        pm.test(\"Response should have token type as Bearer\", function () {",
-													"            pm.expect(pm.response.json().token_type).to.eql(\"Bearer\");",
+													"            pm.expect(jsonResponse.token_type).to.eql(\"Bearer\");",
 													"        });",
 													"",
 													"        break;",
 													"",
 													"    // When username or password is incorrect",
 													"    case 1:",
-													"        pm.test(\"Response status code is 401\", function () {",
+													"        pm.test(\"Response status code should be 401\", function () {",
 													"            pm.expect(pm.response.code).to.equal(401);",
 													"        });",
 													"",
 													"        pm.test(\"Response should have incorrect credentials error message\", function () {",
-													"            pm.expect(pm.response.json().message).to.equal(\"Username or password is incorrect\")",
+													"            pm.expect(jsonResponse.message).to.equal(\"Username or password is incorrect\")",
 													"        });",
 													"",
 													"        break;",
 													"",
 													"    // When invalid client id or no client id is given",
 													"    case 2:",
-													"        pm.test(\"Response status code is 400\", function () {",
+													"        pm.test(\"Response status code should be 400\", function () {",
 													"            pm.response.to.have.status(400);",
 													"        });",
 													"",
 													"        pm.test(\"Response should have an invalid application error\", function () {",
-													"            pm.expect(pm.response.json().error).to.equal(\"invalid application\")",
+													"            pm.expect(jsonResponse.error).to.equal(\"invalid application\")",
 													"        });",
 													"",
 													"        break;",
 													"",
 													"    // When account creation is under process",
 													"    case 3:",
-													"        pm.test(\"Response status code is 401\", function () {",
+													"        pm.test(\"Response status code should be 401\", function () {",
 													"            pm.response.to.have.status(401);            ",
 													"        });",
 													"",
 													"        pm.test(\"Response should have an under process error message\", function () {",
-													"            pm.expect(pm.response.json().message).to.equal(\"Your account creation is under process. Please try again in sometime.\")",
+													"            pm.expect(jsonResponse.message).to.equal(\"Your account creation is under process. Please try again in sometime.\")",
 													"        });",
 													"",
 													"        break;",
@@ -406,7 +407,7 @@
 													"    pm.execution.setNextRequest(pm.info.requestId);",
 													"} else {",
 													"    pm.collectionVariables.set(\"iteration\", 0)",
-													"    pm.execution.setNextRequest(null);",
+													"    pm.execution.setNextRequest(\"Create Agent Identity\");",
 													"}"
 												],
 												"type": "text/javascript",
@@ -616,7 +617,7 @@
 														},
 														{
 															"key": "client_id",
-															"value": "rf3A4qucDH6MdUdHmG1YdJqDGFkoeExMlsktvE_qVxs",
+															"value": "{{rently_client_id}}",
 															"type": "text"
 														}
 													]
@@ -916,6 +917,62 @@
 									]
 								}
 							]
+						},
+						{
+							"name": "Client Credentials",
+							"item": [
+								{
+									"name": "Client Credentials",
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "client_id",
+													"value": "{{armor_client_id}}",
+													"type": "text"
+												},
+												{
+													"key": "client_secret",
+													"value": "{{armor_client_secret}}",
+													"type": "text"
+												},
+												{
+													"key": "grant_type",
+													"value": "client_credentials",
+													"type": "text"
+												},
+												{
+													"key": "redirect_uri",
+													"value": "{{redirect_uri}}",
+													"type": "text"
+												},
+												{
+													"key": "scope",
+													"value": "agent_identity:create",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{armor_url}}/oauth/token",
+											"host": [
+												"{{armor_url}}"
+											],
+											"path": [
+												"oauth",
+												"token"
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						}
 					]
 				}
@@ -929,19 +986,128 @@
 					"item": [
 						{
 							"name": "Create Agent Identity",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let currentIteration = parseInt(pm.collectionVariables.get(\"iteration\"));",
+											"let jsonResponse = pm.response.json();",
+											"",
+											"switch(currentIteration) {",
+											"    // Successful Response",
+											"    case 0:",
+											"        pm.test(\"Response status code should be 201\", function () {",
+											"            pm.response.to.have.status(201);            ",
+											"        });",
+											"",
+											"        pm.test(\"Response should have agent identity id\", function () {",
+											"            pm.expect(jsonResponse.agent_identity.id).to.not.equal(null);",
+											"        });",
+											"",
+											"        pm.test(\"Response should have success as true\", function() {",
+											"            pm.expect(jsonResponse.success).to.be.true;",
+											"        });",
+											"",
+											"        pm.test(\"Errors should be empty\", function () {",
+											"            pm.expect(jsonResponse.errors).to.be.empty;",
+											"        });",
+											"",
+											"        pm.test(\"Response should have success message\", function () {",
+											"            pm.expect(jsonResponse.message).to.eql(\"user successfully created\")",
+											"        });",
+											"",
+											"        break;",
+											"    ",
+											"    // Failure Response",
+											"    case 1:",
+											"        pm.test(\"Response status code should be 400\", function () {",
+											"            pm.response.to.have.status(400);            ",
+											"        });",
+											"",
+											"        pm.test(\"Response should have agent identity id as null\", function () {",
+											"            pm.expect(jsonResponse.agent_identity.id).to.be.null;",
+											"        });",
+											"",
+											"        pm.test(\"Response should have success as false\", function() {",
+											"            pm.expect(jsonResponse.success).to.be.false;",
+											"        });",
+											"",
+											"        pm.test(\"Errors should not be empty\", function () {",
+											"            pm.expect(jsonResponse.errors).to.not.be.empty;",
+											"        });",
+											"",
+											"        pm.test(\"Response should have failure message\", function () {",
+											"            pm.expect(jsonResponse.message).to.eql(\"could not create user\")",
+											"        });",
+											"",
+											"        break;",
+											"",
+											"}",
+											"",
+											"if (currentIteration < 1) {",
+											"    pm.collectionVariables.set(\"iteration\", currentIteration + 1);",
+											"    pm.execution.setNextRequest(pm.info.requestId);",
+											"} else {",
+											"    pm.collectionVariables.set(\"iteration\", 0)",
+											"    pm.execution.setNextRequest(null);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let currentIteration = parseInt(pm.collectionVariables.get(\"iteration\"));",
+											"let requestData = [",
+											"    { \"email\":\"{{$randomEmail}}\", \"password\": \"Rently@1234\", \"password_confirmation\": \"Rently@1234\"},",
+											"    { \"email\": \"invalid_email\", \"password\": \"\", \"password_confirmation\": \"\" },",
+											"]",
+											"",
+											"",
+											"let currentData = requestData[currentIteration];",
+											"pm.variables.set(\"email\", currentData[\"email\"]);",
+											"pm.variables.set(\"password\", currentData[\"password\"]);",
+											"pm.variables.set(\"password_confirmation\", currentData[\"password_confirmation\"]);",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
 										{
-											"key": "token",
-											"value": "",
-											"type": "string"
+											"key": "agent_identity[email]",
+											"value": "{{email}}",
+											"type": "text"
+										},
+										{
+											"key": "agent_identity[password]",
+											"value": "{{password}}",
+											"type": "text"
+										},
+										{
+											"key": "agent_identity[password_confirmation]",
+											"value": "{{password_confirmation}}",
+											"type": "text"
+										},
+										{
+											"key": "agent_identity[company_id]",
+											"value": "{{postman_company_id}}",
+											"type": "text",
+											"disabled": true
 										}
 									]
 								},
-								"method": "POST",
-								"header": [],
 								"url": {
 									"raw": "{{armor_url}}/api/v1/agent_identities",
 									"host": [
@@ -954,13 +1120,279 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Successful Response",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "agent_identity[email]",
+													"value": "{{email}}",
+													"type": "text"
+												},
+												{
+													"key": "agent_identity[password]",
+													"value": "{{password}}",
+													"type": "text"
+												},
+												{
+													"key": "agent_identity[password_confirmation]",
+													"value": "{{password_confirmation}}",
+													"type": "text"
+												},
+												{
+													"key": "agent_identity[company_id]",
+													"value": "4",
+													"type": "text",
+													"disabled": true
+												}
+											]
+										},
+										"url": {
+											"raw": "https://armor.rentlyqeop.com/api/v1/agent_identities",
+											"protocol": "https",
+											"host": [
+												"armor",
+												"rentlyqeop",
+												"com"
+											],
+											"path": [
+												"api",
+												"v1",
+												"agent_identities"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "openresty"
+										},
+										{
+											"key": "Date",
+											"value": "Thu, 04 Jul 2024 06:37:01 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "179"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "Etag",
+											"value": "W/\"1f1ddcd4c5b64be356dfa8e6d88638e9\""
+										},
+										{
+											"key": "Referrer-Policy",
+											"value": "strict-origin-when-cross-origin"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-Download-Options",
+											"value": "noopen"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-Permitted-Cross-Domain-Policies",
+											"value": "none"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "104c971a-5763-4b2b-a310-883ffc937beb"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.582223"
+										},
+										{
+											"key": "X-Served-By",
+											"value": "armor.rentlyqeop.com"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"agent_identity\": {\n        \"id\": \"ce46d13e-47ad-414d-8856-69e06ce6ecef\",\n        \"email\": \"braxton39@hotmail.com\",\n        \"company_id\": null\n    },\n    \"success\": true,\n    \"errors\": [],\n    \"message\": \"user successfully created\"\n}"
+								},
+								{
+									"name": "Failure Response",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "agent_identity[email]",
+													"value": "{{email}}",
+													"type": "text"
+												},
+												{
+													"key": "agent_identity[password]",
+													"value": "{{password}}",
+													"type": "text"
+												},
+												{
+													"key": "agent_identity[password_confirmation]",
+													"value": "{{password_confirmation}}",
+													"type": "text"
+												},
+												{
+													"key": "agent_identity[company_id]",
+													"value": "4",
+													"type": "text",
+													"disabled": true
+												}
+											]
+										},
+										"url": {
+											"raw": "https://armor.rentlyqeop.com/api/v1/agent_identities",
+											"protocol": "https",
+											"host": [
+												"armor",
+												"rentlyqeop",
+												"com"
+											],
+											"path": [
+												"api",
+												"v1",
+												"agent_identities"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "openresty"
+										},
+										{
+											"key": "Date",
+											"value": "Thu, 04 Jul 2024 06:37:37 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "no-cache"
+										},
+										{
+											"key": "Referrer-Policy",
+											"value": "strict-origin-when-cross-origin"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-Download-Options",
+											"value": "noopen"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-Permitted-Cross-Domain-Policies",
+											"value": "none"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "6e372929-713e-440e-8bc0-2bfcf454bd04"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.633697"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"agent_identity\": {\n        \"id\": null,\n        \"email\": \"invalid_email\",\n        \"company_id\": null\n    },\n    \"success\": false,\n    \"errors\": [\n        \"Email is invalid\",\n        \"Password can't be blank\"\n    ],\n    \"message\": \"could not create user\"\n}"
+								}
+							]
 						}
 					]
 				}
 			]
 		}
 	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "scope",
+				"value": "agent_identity:create",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "client_credentials",
+				"type": "string"
+			},
+			{
+				"key": "authUrl",
+				"value": "{{armor_url}}",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{armor_client_secret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{armor_client_id}}",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "{{armor_url}}/oauth/token",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "Token",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
 	"event": [
 		{
 			"listen": "prerequest",
