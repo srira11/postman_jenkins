@@ -929,8 +929,109 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.collectionVariables.set(\"access_token\", pm.response.json().access_token);",
-													"pm.execution.setNextRequest(\"Create Agent Identity\");",
+													"let currentIteration = parseInt(pm.collectionVariables.get(\"iteration\"));",
+													"let jsonResponse = pm.response.json();",
+													"",
+													"switch(currentIteration) {",
+													"    // Successful Response",
+													"    case 0:",
+													"        pm.test(\"Response status code should be 200\", function () {",
+													"            pm.response.to.have.status(200);            ",
+													"        });",
+													"",
+													"        pm.test(\"Response should have an access_token\", function () {",
+													"            pm.expect(jsonResponse.access_token).to.exist;",
+													"        });",
+													"",
+													"        // pm.test(\"Response should have a refresh_token\", function () {",
+													"        //     pm.expect(jsonResponse.refresh_token).to.exist;",
+													"        // });",
+													"",
+													"        pm.test(\"Response should have a defined scope\", function () {",
+													"            pm.expect(jsonResponse.scope).to.exist;",
+													"        });",
+													"",
+													"        pm.test(\"Response should have a expiring time\", function () {",
+													"            pm.expect(jsonResponse.expires_in).to.exist;",
+													"        });",
+													"",
+													"        pm.test(\"Response should have token type as Bearer\", function () {",
+													"            pm.expect(jsonResponse.token_type).to.eql(\"Bearer\");",
+													"        });",
+													"",
+													"        pm.collectionVariables.set(\"access_token\", pm.response.json().access_token);",
+													"",
+													"        break;",
+													"",
+													"    // When client id or client secret is wrong",
+													"    case 1:",
+													"        pm.test(\"Response status code should be 401\", function () {",
+													"            pm.response.to.have.status(401);            ",
+													"        });",
+													"",
+													"        pm.test(\"Response should have invliad client error\", function () {",
+													"            pm.expect(jsonResponse.error).to.eq(\"invalid_client\");",
+													"        });",
+													"",
+													"        break;",
+													"",
+													"    // When invalid scope is given",
+													"    case 2:",
+													"        pm.test(\"Response status code should be 400\", function () {",
+													"            pm.expect(pm.response.code).to.equal(400);",
+													"        });",
+													"",
+													"        pm.test(\"Response should have invalid scope error\", function () {",
+													"            pm.expect(jsonResponse.error).to.eq(\"invalid_scope\");",
+													"        });",
+													"}",
+													"",
+													"if (currentIteration < 2) {",
+													"    pm.collectionVariables.set(\"iteration\", currentIteration + 1);",
+													"    pm.execution.setNextRequest(pm.info.requestId);",
+													"} else {",
+													"    pm.collectionVariables.set(\"iteration\", 0)",
+													"    pm.execution.setNextRequest(\"Create Agent Identity\");",
+													"}",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"let currentIteration = parseInt(pm.collectionVariables.get(\"iteration\"));",
+													"let requestData = [",
+													"    {",
+													"        \"client_id\": pm.environment.get(\"armor_client_id\"),",
+													"        \"client_secret\": pm.environment.get(\"armor_client_secret\"),",
+													"        \"scope\": \"agent_identity:create agent_identity:update agent_identity:destroy agent_identity:password_reset_token agent_identity:claim_profile agent_identity:claim_salesforce_id agent_identity:claim_rently_id agent_identity:claim_sso_enabled\",",
+													"    },",
+													"    {",
+													"        \"client_id\": \"abc\",",
+													"        \"client_secret\": \"def\",",
+													"        \"scope\": \"\",",
+													"    },",
+													"    {",
+													"        \"client_id\": pm.environment.get(\"armor_client_id\"),",
+													"        \"client_secret\": pm.environment.get(\"armor_client_secret\"),",
+													"        \"scope\": \"admin:create\",",
+													"    },",
+													"    {",
+													"        \"client_id\": pm.environment.get(\"armor_client_id\"),",
+													"        \"client_secret\": pm.environment.get(\"armor_client_secret\"),",
+													"        \"scope\": \"agent_identity:create\",",
+													"    }",
+													"]",
+													"",
+													"let currentData = requestData[currentIteration];",
+													"pm.variables.set(\"client_id\", currentData[\"client_id\"]);",
+													"pm.variables.set(\"client_secret\", currentData[\"client_secret\"]);",
+													"pm.variables.set(\"scope\", currentData[\"scope\"]);",
+													"pm.variables.set(\"redirect_uri\", currentData[\"redirect_uri\"])",
 													""
 												],
 												"type": "text/javascript",
@@ -949,12 +1050,12 @@
 											"urlencoded": [
 												{
 													"key": "client_id",
-													"value": "{{armor_client_id}}",
+													"value": "{{client_id}}",
 													"type": "text"
 												},
 												{
 													"key": "client_secret",
-													"value": "{{armor_client_secret}}",
+													"value": "{{client_secret}}",
 													"type": "text"
 												},
 												{
@@ -969,7 +1070,7 @@
 												},
 												{
 													"key": "scope",
-													"value": "agent_identity:create",
+													"value": "{{scope}}",
 													"type": "text"
 												}
 											]
@@ -985,7 +1086,354 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Successful Response",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "client_id",
+															"value": "{{client_id}}",
+															"type": "text"
+														},
+														{
+															"key": "client_secret",
+															"value": "{{client_secret}}",
+															"type": "text"
+														},
+														{
+															"key": "grant_type",
+															"value": "client_credentials",
+															"type": "text"
+														},
+														{
+															"key": "redirect_uri",
+															"value": "{{redirect_uri}}",
+															"type": "text"
+														},
+														{
+															"key": "scope",
+															"value": "{{scope}}",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{armor_url}}/oauth/token",
+													"host": [
+														"{{armor_url}}"
+													],
+													"path": [
+														"oauth",
+														"token"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "openresty"
+												},
+												{
+													"key": "Date",
+													"value": "Thu, 04 Jul 2024 08:57:37 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Content-Length",
+													"value": "1056"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Cache-Control",
+													"value": "no-store"
+												},
+												{
+													"key": "Etag",
+													"value": "W/\"d207da9b690d3cd56132cae3d1875f34\""
+												},
+												{
+													"key": "Referrer-Policy",
+													"value": "strict-origin-when-cross-origin"
+												},
+												{
+													"key": "Vary",
+													"value": "Accept, Origin"
+												},
+												{
+													"key": "X-Content-Type-Options",
+													"value": "nosniff"
+												},
+												{
+													"key": "X-Download-Options",
+													"value": "noopen"
+												},
+												{
+													"key": "X-Frame-Options",
+													"value": "SAMEORIGIN"
+												},
+												{
+													"key": "X-Permitted-Cross-Domain-Policies",
+													"value": "none"
+												},
+												{
+													"key": "X-Request-Id",
+													"value": "4ec8866f-d9c5-4560-9bfa-22cd1c445118"
+												},
+												{
+													"key": "X-Runtime",
+													"value": "0.022812"
+												},
+												{
+													"key": "X-Served-By",
+													"value": "armor.rentlyqeop.com"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"access_token\": \"eyJraWQiOiJlNjk1ZDkxMTMzM2Y2NGFmMGNkOWVlODYzNTNiMDk3MjU4Y2VjMDI2NzJkNzJmZDEwNGRmYjA1MmI2ODBjNmQ4IiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FybW9yLnJlbnRseXFlb3AuY29tIiwiaWF0IjoxNzIwMDgzNDU3LCJhdWQiOiJyNjhCbml6aEJhREk3TzQ2cUdmMU1zMHd2RTczUGdzMWRQdm85R29IOW1nIiwianRpIjoiMzE5OTZmZTEtYjIxNi00NjRjLWJmNzMtYmQ1NTIzNGFlYTYxIiwic3ViIjpudWxsLCJleHAiOjE3MjAwOTA2NTcsInN1Yl91cGRhdGVkX2F0IjpudWxsfQ.Zr5xCoA0BEmnr_Xe4k-DHZHCGK8BuIYkPQJibwZJRRIznLn45tXNcP58fBeh1sCe1JngJyjl7nDL2WmIzGlTRZOkAKp9AIAyRz_fuUEVxo9rLRZSxerqQ56CU4FqIUZypM3TWG8GVUEe_wsLYhwDnWhgutd1LTsAOFTWwJAcyFhOlnXqyK2zZKJSlSiA-7TLJ3hCdm0RGaVaaK4UIeGf4pxBSJAloouwUnVFqPCu5nv4FMeYs4ajGufQR9O_T1Q2mRcAHJluv31aMnyVO75roHIj0wuVAaMuqukpV4Z-mctJ1Z0UitPGS4A3Yy4G9LVBUUVhypidtqn3Zi_nJhNbJA\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 7200,\n    \"scope\": \"agent_identity:create agent_identity:update agent_identity:destroy agent_identity:password_reset_token agent_identity:claim_profile agent_identity:claim_salesforce_id agent_identity:claim_rently_id agent_identity:claim_sso_enabled\",\n    \"created_at\": 1720083457\n}"
+										},
+										{
+											"name": "When client id or client secret is wrong",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "client_id",
+															"value": "{{client_id}}",
+															"type": "text"
+														},
+														{
+															"key": "client_secret",
+															"value": "{{client_secret}}",
+															"type": "text"
+														},
+														{
+															"key": "grant_type",
+															"value": "client_credentials",
+															"type": "text"
+														},
+														{
+															"key": "redirect_uri",
+															"value": "{{redirect_uri}}",
+															"type": "text"
+														},
+														{
+															"key": "scope",
+															"value": "{{scope}}",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{armor_url}}/oauth/token",
+													"host": [
+														"{{armor_url}}"
+													],
+													"path": [
+														"oauth",
+														"token"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "openresty"
+												},
+												{
+													"key": "Date",
+													"value": "Thu, 04 Jul 2024 09:30:40 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Cache-Control",
+													"value": "no-store"
+												},
+												{
+													"key": "Referrer-Policy",
+													"value": "strict-origin-when-cross-origin"
+												},
+												{
+													"key": "Vary",
+													"value": "Accept, Origin"
+												},
+												{
+													"key": "Www-Authenticate",
+													"value": "Bearer realm=\"Doorkeeper\", error=\"invalid_client\", error_description=\"Client authentication failed due to unknown client, no client authentication included, or unsupported authentication method.\""
+												},
+												{
+													"key": "X-Content-Type-Options",
+													"value": "nosniff"
+												},
+												{
+													"key": "X-Download-Options",
+													"value": "noopen"
+												},
+												{
+													"key": "X-Frame-Options",
+													"value": "SAMEORIGIN"
+												},
+												{
+													"key": "X-Permitted-Cross-Domain-Policies",
+													"value": "none"
+												},
+												{
+													"key": "X-Request-Id",
+													"value": "ad2a4b2d-09cb-4f03-afa1-1f02f91d9cc2"
+												},
+												{
+													"key": "X-Runtime",
+													"value": "0.005820"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"error\": \"invalid_client\",\n    \"error_description\": \"Client authentication failed due to unknown client, no client authentication included, or unsupported authentication method.\"\n}"
+										},
+										{
+											"name": "When invalid scope is given",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "urlencoded",
+													"urlencoded": [
+														{
+															"key": "client_id",
+															"value": "{{client_id}}",
+															"type": "text"
+														},
+														{
+															"key": "client_secret",
+															"value": "{{client_secret}}",
+															"type": "text"
+														},
+														{
+															"key": "grant_type",
+															"value": "client_credentials",
+															"type": "text"
+														},
+														{
+															"key": "redirect_uri",
+															"value": "{{redirect_uri}}",
+															"type": "text"
+														},
+														{
+															"key": "scope",
+															"value": "{{scope}}",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{armor_url}}/oauth/token",
+													"host": [
+														"{{armor_url}}"
+													],
+													"path": [
+														"oauth",
+														"token"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "openresty"
+												},
+												{
+													"key": "Date",
+													"value": "Thu, 04 Jul 2024 09:34:26 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Cache-Control",
+													"value": "no-store"
+												},
+												{
+													"key": "Referrer-Policy",
+													"value": "strict-origin-when-cross-origin"
+												},
+												{
+													"key": "Vary",
+													"value": "Accept, Origin"
+												},
+												{
+													"key": "Www-Authenticate",
+													"value": "Bearer realm=\"Doorkeeper\", error=\"invalid_scope\", error_description=\"The requested scope is invalid, unknown, or malformed.\""
+												},
+												{
+													"key": "X-Content-Type-Options",
+													"value": "nosniff"
+												},
+												{
+													"key": "X-Download-Options",
+													"value": "noopen"
+												},
+												{
+													"key": "X-Frame-Options",
+													"value": "SAMEORIGIN"
+												},
+												{
+													"key": "X-Permitted-Cross-Domain-Policies",
+													"value": "none"
+												},
+												{
+													"key": "X-Request-Id",
+													"value": "b59ba3d0-e35a-401d-9030-6e30ad9b0a9f"
+												},
+												{
+													"key": "X-Runtime",
+													"value": "0.004770"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"error\": \"invalid_scope\",\n    \"error_description\": \"The requested scope is invalid, unknown, or malformed.\"\n}"
+										}
+									]
 								}
 							]
 						}
